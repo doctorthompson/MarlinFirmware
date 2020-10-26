@@ -503,11 +503,11 @@
     #define DEFAULT_Ki_LIST {   1.08,   1.08 }
     #define DEFAULT_Kd_LIST { 114.00, 114.00 }
   #else
-    // Creality Ender-3
-    #define DEFAULT_Kp 20.61
-    #define DEFAULT_Ki 1.49
-    #define DEFAULT_Kd 71.05
-    // Set with M301 P20.61 I1.49 D71.05
+    // My Ender 3Z
+    #define DEFAULT_Kp 64.1212
+    #define DEFAULT_Ki 10.9571
+    #define DEFAULT_Kd 93.8093
+    // Set with M301 P64.1212 I10.9571 D93.8093
   #endif
 #endif // PIDTEMP
 
