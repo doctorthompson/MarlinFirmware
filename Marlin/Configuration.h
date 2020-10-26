@@ -551,9 +551,11 @@
   // #define DEFAULT_bedKd 305.4
 
   // FIND YOUR OWN: "M303 E-1 C8 S90" to run autotune on the bed at 90 degreesC for 8 cycles.
-  #define DEFAULT_bedKp 50.71
-  #define DEFAULT_bedKi 9.88
-  #define DEFAULT_bedKd 173.43
+  // My Ender 3Z
+  #define DEFAULT_bedKp 228.4170
+  #define DEFAULT_bedKi 43.8378
+  #define DEFAULT_bedKd 793.4446
+
 
 #endif // PIDTEMPBED
 
