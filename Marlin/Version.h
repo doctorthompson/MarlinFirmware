@@ -28,7 +28,7 @@
 /**
  * Marlin release version identifier
  */
-#define SHORT_BUILD_VERSION "bugfix-2.0.x-20210320"
+#define SHORT_BUILD_VERSION "bugfix-2.0.x-20210411"
 
 /**
  * Verbose version identifier which should contain a reference to the location
@@ -41,7 +41,7 @@
  * here we define this default string as the date where the latest release
  * version was tagged.
  */
-#define STRING_DISTRIBUTION_DATE "2021-03-20"
+#define STRING_DISTRIBUTION_DATE "2021-04-11"
 
 /**
  * Defines a generic printer name to be output to the LCD after booting Marlin.
@@ -54,7 +54,7 @@
  * has a distinct Github fork— the Source Code URL should just be the main
  * Marlin repository.
  */
-#define SOURCE_CODE_URL "https://github.com/doctorthompson/Mrln"
+#define SOURCE_CODE_URL "https://github.com/doctorthompson/MarlinFirmware"
 
 /**
  * Default generic printer UUID.
