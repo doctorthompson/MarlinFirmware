@@ -419,11 +419,6 @@ class Temperature {
 
   private:
 
-<<<<<<< HEAD
-    static volatile bool raw_temps_ready;
-
-=======
->>>>>>> 0c8a53e507fa792b114a89fe6902f4efe4ed2fe8
     #if ENABLED(WATCH_HOTENDS)
       static hotend_watch_t watch_hotend[HOTENDS];
     #endif
