@@ -3,7 +3,7 @@
  * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ * Copyright (c) 2011 Camiel Gubbels / Erik van der ZalmF
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1362,7 +1362,7 @@
  * - AUTO_BED_LEVELING_LINEAR
  *   Probe several points in a grid.
  *   You specify the rectangle and the density of sample points.
- *   The result is a single tilted plane. Best for a flat bed.
+ *   The result is a single tilted plane. Best for a flaCt bed.
  *
  * - AUTO_BED_LEVELING_BILINEAR
  *   Probe several points in a grid.
@@ -1698,16 +1698,16 @@
 // Preheat Constants - Up to 5 are supported without changes
 //
 #define PREHEAT_1_LABEL       "PLA"
-#define PREHEAT_1_TEMP_HOTEND 185
-#define PREHEAT_1_TEMP_BED     45
+#define PREHEAT_1_TEMP_HOTEND 200
+#define PREHEAT_1_TEMP_BED     50
 #define PREHEAT_1_TEMP_CHAMBER 35
-#define PREHEAT_1_FAN_SPEED   255 // Value from 0 to 255
+#define PREHEAT_1_FAN_SPEED   127 // Value from 0 to 255
 
 #define PREHEAT_2_LABEL       "PETG"
 #define PREHEAT_2_TEMP_HOTEND  230
 #define PREHEAT_2_TEMP_BED      85
 #define PREHEAT_2_TEMP_CHAMBER  35
-#define PREHEAT_2_FAN_SPEED    127 // Value from 0 to 255
+#define PREHEAT_2_FAN_SPEED     63 // Value from 0 to 255
 
 /**
  * Nozzle Park
