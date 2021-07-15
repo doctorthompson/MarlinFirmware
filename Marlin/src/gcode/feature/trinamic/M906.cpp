@@ -48,7 +48,7 @@ void GcodeSuite::M906() {
 
   bool report = true;
 
-  #if AXIS_IS_TMC(X) || AXIS_IS_TMC(X2) || AXIS_IS_TMC(Y) || AXIS_IS_TMC(Y2) || AXIS_IS_TMC(Z) || AXIS_IS_TMC(Z2) || AXIS_IS_TMC(Z3) || AXIS_IS_TMC(Z4)
+  #if AXIS_IS_TMC(X) || AXIS_IS_TMC(X2) || AXIS_IS_TMC(Y) || AXIS_IS_TMC(Y2) || AXIS_IS_TMC(Z) || AXIS_IS_TMC(Z2) || AXIS_IS_TMC(Z3) || AXIS_IS_TMC(Z4) || AXIS_IS_TMC(I) || AXIS_IS_TMC(J) || AXIS_IS_TMC(K)
     const uint8_t index = parser.byteval('I');
   #endif
 
@@ -64,7 +64,7 @@ void GcodeSuite::M906() {
         #endif
         break;
 
-      #if LINEAR_AXES >= XY
+      #if HAS_Y_AXIS
         case Y_AXIS:
           #if AXIS_IS_TMC(Y)
             if (index == 0) TMC_SET_CURRENT(Y);
@@ -92,11 +92,21 @@ void GcodeSuite::M906() {
           break;
       #endif
 
-      #if HAS_EXTRUDERS
+      #if AXIS_IS_TMC(I)
+        case I_AXIS: TMC_SET_CURRENT(I); break;
+      #endif
+      #if AXIS_IS_TMC(J)
+        case J_AXIS: TMC_SET_CURRENT(J); break;
+      #endif
+      #if AXIS_IS_TMC(K)
+        case K_AXIS: TMC_SET_CURRENT(K); break;
+      #endif
+
+      #if E_STEPPERS
         case E_AXIS: {
-          const int8_t target_extruder = get_target_extruder_from_command();
-          if (target_extruder < 0) return;
-          switch (target_extruder) {
+          const int8_t target_e_stepper = get_target_e_stepper_from_command();
+          if (target_e_stepper < 0) return;
+          switch (target_e_stepper) {
             #if AXIS_IS_TMC(E0)
               case 0: TMC_SET_CURRENT(E0); break;
             #endif
@@ -151,6 +161,15 @@ void GcodeSuite::M906() {
     #endif
     #if AXIS_IS_TMC(Z4)
       TMC_SAY_CURRENT(Z4);
+    #endif
+    #if AXIS_IS_TMC(I)
+      TMC_SAY_CURRENT(I);
+    #endif
+    #if AXIS_IS_TMC(J)
+      TMC_SAY_CURRENT(J);
+    #endif
+    #if AXIS_IS_TMC(K)
+      TMC_SAY_CURRENT(K);
     #endif
     #if AXIS_IS_TMC(E0)
       TMC_SAY_CURRENT(E0);

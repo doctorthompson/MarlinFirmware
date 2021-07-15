@@ -155,6 +155,17 @@
     #define DOGLCD_SCK                      PB13
     #define DOGLCD_MOSI                     PB15
 
+  #elif ENABLED(MKS_MINI_12864_V3)
+    #define ENABLE_SPI3
+    #define DOGLCD_CS                       PA4
+    #define DOGLCD_A0                       PA5
+    #define LCD_PINS_DC                     DOGLCD_A0
+    #define LCD_BACKLIGHT_PIN               -1
+    #define LCD_RESET_PIN                   PA6
+    #define NEOPIXEL_PIN                    PA7
+    #define DOGLCD_MOSI                     PB15
+    #define DOGLCD_SCK                      PB13
+
   #else
 
     #define LCD_PINS_D4                     PA6
@@ -186,7 +197,6 @@
 
 // TODO: This is the only way to set SPI for SD on STM32 (for now)
 #define ENABLE_SPI2
-#define CUSTOM_SPI_PINS
 #define SD_SCK_PIN                          PB13
 #define SD_MISO_PIN                         PB14
 #define SD_MOSI_PIN                         PB15
