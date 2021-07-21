@@ -1,6 +1,6 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (c) 2021 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
  * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
@@ -21,23 +21,26 @@
  */
 #pragma once
 
-#define BOARD_INFO_NAME "Chitu3D V5"
+#include "env_validate.h"
 
-/**
- * 2017 Victor Perez Marlin for stm32f1 test
- */
-
-#define BOARD_INFO_NAME      "Chitu3D V5"
-#define DEFAULT_MACHINE_NAME "STM32F103ZET6"
+#ifndef BOARD_INFO_NAME
+  #define BOARD_INFO_NAME      "Chitu3D"
+#endif
+#ifndef DEFAULT_MACHINE_NAME
+  #define DEFAULT_MACHINE_NAME "STM32F103ZET6"
+#endif
 
 #define BOARD_NO_NATIVE_USB
-
 #define DISABLE_JTAG
 
 //
 // EEPROM
 //
-#define FLASH_EEPROM_EMULATION
+
+#if NO_EEPROM_SELECTED
+  #define FLASH_EEPROM_EMULATION
+#endif
+
 #if ENABLED(FLASH_EEPROM_EMULATION)
   // SoC Flash (framework-arduinoststm32-maple/STM32F1/libraries/EEPROM/EEPROM.h)
   #define EEPROM_START_ADDRESS (0x8000000UL + (512 * 1024) - 2 * EEPROM_PAGE_SIZE)
@@ -52,7 +55,9 @@
 //
 #define X_STOP_PIN                          PG10
 #define Y_STOP_PIN                          PA12
-#define Z_STOP_PIN                          PA14
+#ifndef Z_STOP_PIN
+  #define Z_STOP_PIN                        PG9
+#endif
 
 //
 // Steppers
@@ -80,14 +85,15 @@
 //
 // Temperature Sensors
 //
-#define TEMP_0_PIN                          PA1   // TH1
-#define TEMP_BED_PIN                        PA0   // TB1
+#define TEMP_0_PIN                          PA1   // TH1 Analog Input
+#define TEMP_BED_PIN                        PA0   // TB1 Analog Input
 
 //
 // Heaters
 //
 #define HEATER_0_PIN                        PG12  // HEATER1
 #define HEATER_BED_PIN                      PG11  // HOT BED
+//#define HEATER_BED_INVERTING              true
 
 //
 // Fans
@@ -100,9 +106,12 @@
 // Misc
 //
 #define BEEPER_PIN                          PB0
-//#define LED_PIN                           -1
-//#define POWER_LOSS_PIN                    -1
-#define FIL_RUNOUT_PIN                      PA15
+//#define LED_PIN                           PD3
+//#define POWER_LOSS_PIN                    PG2   // PG4 PW_DET
+
+#ifndef FIL_RUNOUT_PIN
+  #define FIL_RUNOUT_PIN                    PA15  // MT_DET
+#endif
 
 // SPI Flash
 #define HAS_SPI_FLASH                          1
@@ -152,11 +161,17 @@
 #endif
 
 // SPI1(PA7)=LCD & SPI3(PB5)=STUFF, are not available
-// Needs to use SPI2
+// so SPI2 is required.
 #define SPI_DEVICE                             2
 #define SD_SCK_PIN                          PB13
 #define SD_MISO_PIN                         PB14
 #define SD_MOSI_PIN                         PB15
 #define SD_SS_PIN                           PB12
 
-#include "pins_CHITU3D_common.h"
+//
+// SD Card
+//
+#define SDIO_SUPPORT
+#define SD_DETECT_PIN                       -1    // PF0, but it isn't connected
+#define SDIO_CLOCK                       4500000
+#define SDIO_READ_RETRIES                     16
