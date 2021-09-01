@@ -47,7 +47,7 @@ MarlinUI ui;
 #endif
 
 #if ENABLED(DWIN_CREALITY_LCD)
-  #include "dwin/e3v2/dwin.h"
+  #include "e3v2/creality/dwin.h"
 #endif
 
 #if ENABLED(LCD_PROGRESS_BAR) && !IS_TFTGLCD_PANEL
@@ -65,15 +65,8 @@ MarlinUI ui;
 constexpr uint8_t epps = ENCODER_PULSES_PER_STEP;
 
 #if HAS_STATUS_MESSAGE
-  #if HAS_WIRED_LCD
-    #if ENABLED(STATUS_MESSAGE_SCROLLING)
-      uint8_t MarlinUI::status_scroll_offset; // = 0
-      constexpr uint8_t MAX_MESSAGE_LENGTH = _MAX(LONG_FILENAME_LENGTH, MAX_LANG_CHARSIZE * 2 * (LCD_WIDTH));
-    #else
-      constexpr uint8_t MAX_MESSAGE_LENGTH = MAX_LANG_CHARSIZE * (LCD_WIDTH);
-    #endif
-  #else
-    constexpr uint8_t MAX_MESSAGE_LENGTH = 63;
+  #if BOTH(HAS_WIRED_LCD, STATUS_MESSAGE_SCROLLING)
+    uint8_t MarlinUI::status_scroll_offset; // = 0
   #endif
   char MarlinUI::status_message[MAX_MESSAGE_LENGTH + 1];
   uint8_t MarlinUI::alert_level; // = 0
@@ -88,6 +81,25 @@ constexpr uint8_t epps = ENCODER_PULSES_PER_STEP;
 
 #if HAS_MULTI_LANGUAGE
   uint8_t MarlinUI::language; // Initialized by settings.load()
+  void MarlinUI::set_language(const uint8_t lang) {
+    if (lang < NUM_LANGUAGES) {
+      language = lang;
+      TERN_(HAS_MARLINUI_U8GLIB, update_language_font());
+      return_to_status();
+      refresh();
+    }
+  }
+#endif
+
+#if HAS_LCD_BRIGHTNESS
+  uint8_t MarlinUI::brightness = DEFAULT_LCD_BRIGHTNESS;
+  bool MarlinUI::backlight = true;
+
+  void MarlinUI::set_brightness(const uint8_t value) {
+    backlight = !!value;
+    if (backlight) brightness = constrain(value, MIN_LCD_BRIGHTNESS, MAX_LCD_BRIGHTNESS);
+    // Set brightness on enabled LCD here
+  }
 #endif
 
 #if ENABLED(SOUND_MENU_ITEM)
@@ -158,6 +170,10 @@ constexpr uint8_t epps = ENCODER_PULSES_PER_STEP;
     #include "../feature/power_monitor.h"
   #endif
 
+  #if ENABLED(PSU_CONTROL) && defined(LED_BACKLIGHT_TIMEOUT)
+    #include "../feature/power.h"
+  #endif
+
   #if HAS_ENCODER_ACTION
     volatile uint8_t MarlinUI::buttons;
     #if HAS_SLOW_BUTTONS
@@ -184,6 +200,10 @@ constexpr uint8_t epps = ENCODER_PULSES_PER_STEP;
 
   #if HAS_MARLINUI_U8GLIB
     bool MarlinUI::drawing_screen, MarlinUI::first_page; // = false
+  #endif
+
+  #if IS_DWIN_MARLINUI
+    bool MarlinUI::did_first_redraw;
   #endif
 
   // Encoder Handling
@@ -319,6 +339,7 @@ constexpr uint8_t epps = ENCODER_PULSES_PER_STEP;
           col = (LCD_WIDTH - plen - slen) / 2;
           row = LCD_HEIGHT > 3 ? 1 : 0;
         }
+        if (LCD_HEIGHT >= 8) row = LCD_HEIGHT / 2 - 2;
         wrap_string_P(col, row, pref, true);
         if (string) {
           if (col) { col = 0; row++; } // Move to the start of the next line
@@ -700,7 +721,7 @@ constexpr uint8_t epps = ENCODER_PULSES_PER_STEP;
      *     This is used to achieve more rapid stepping on kinematic machines.
      *
      * Currently used by the _lcd_move_xyz function in menu_motion.cpp
-     * and the ubl_map_move_to_xy funtion in menu_ubl.cpp.
+     * and the ubl_map_move_to_xy function in menu_ubl.cpp.
      */
     void ManualMove::task() {
 
@@ -826,8 +847,8 @@ constexpr uint8_t epps = ENCODER_PULSES_PER_STEP;
     static uint16_t max_display_update_time = 0;
     millis_t ms = millis();
 
-    #ifdef LED_BACKLIGHT_TIMEOUT
-      leds.update_timeout(powersupply_on);
+    #if ENABLED(PSU_CONTROL) && defined(LED_BACKLIGHT_TIMEOUT)
+      leds.update_timeout(powerManager.psu_on);
     #endif
 
     #if HAS_LCD_MENU
@@ -976,8 +997,8 @@ constexpr uint8_t epps = ENCODER_PULSES_PER_STEP;
 
           refresh(LCDVIEW_REDRAW_NOW);
 
-          #ifdef LED_BACKLIGHT_TIMEOUT
-            if (!powersupply_on) leds.reset_timeout(ms);
+          #if ENABLED(PSU_CONTROL) && defined(LED_BACKLIGHT_TIMEOUT)
+            if (!powerManager.psu_on) leds.reset_timeout(ms);
           #endif
         }
 
@@ -1056,6 +1077,9 @@ constexpr uint8_t epps = ENCODER_PULSES_PER_STEP;
         #else
 
           run_current_screen();
+
+          // Apply all DWIN drawing after processing
+          TERN_(IS_DWIN_MARLINUI, DWIN_UpdateLCD());
 
         #endif
 
@@ -1659,6 +1683,40 @@ constexpr uint8_t epps = ENCODER_PULSES_PER_STEP;
       if (touch_calibration.need_calibration()) ui.goto_screen(touch_screen_calibration);
     #endif
   }
+#endif
+
+#if BOTH(EXTENSIBLE_UI, ADVANCED_PAUSE_FEATURE)
+
+  void MarlinUI::pause_show_message(
+    const PauseMessage message,
+    const PauseMode mode/*=PAUSE_MODE_SAME*/,
+    const uint8_t extruder/*=active_extruder*/
+  ) {
+    if (mode == PAUSE_MODE_SAME)
+      return;
+    pause_mode = mode;
+    switch (message) {
+      case PAUSE_MESSAGE_PARKING:  ExtUI::onUserConfirmRequired_P(GET_TEXT(MSG_PAUSE_PRINT_PARKING));
+      case PAUSE_MESSAGE_CHANGING: ExtUI::onUserConfirmRequired_P(GET_TEXT(MSG_FILAMENT_CHANGE_INIT));
+      case PAUSE_MESSAGE_UNLOAD:   ExtUI::onUserConfirmRequired_P(GET_TEXT(MSG_FILAMENT_CHANGE_UNLOAD));
+      case PAUSE_MESSAGE_WAITING:  ExtUI::onUserConfirmRequired_P(GET_TEXT(MSG_ADVANCED_PAUSE_WAITING));
+      case PAUSE_MESSAGE_INSERT:   ExtUI::onUserConfirmRequired_P(GET_TEXT(MSG_FILAMENT_CHANGE_INSERT));
+      case PAUSE_MESSAGE_LOAD:     ExtUI::onUserConfirmRequired_P(GET_TEXT(MSG_FILAMENT_CHANGE_LOAD));
+      case PAUSE_MESSAGE_PURGE:
+        #if ENABLED(ADVANCED_PAUSE_CONTINUOUS_PURGE)
+          ExtUI::onUserConfirmRequired_P(GET_TEXT(MSG_FILAMENT_CHANGE_CONT_PURGE));
+        #else
+          ExtUI::onUserConfirmRequired_P(GET_TEXT(MSG_FILAMENT_CHANGE_PURGE));
+        #endif
+      case PAUSE_MESSAGE_RESUME:   ExtUI::onUserConfirmRequired_P(GET_TEXT(MSG_FILAMENT_CHANGE_RESUME));
+      case PAUSE_MESSAGE_HEAT:     ExtUI::onUserConfirmRequired_P(GET_TEXT(MSG_FILAMENT_CHANGE_HEAT));
+      case PAUSE_MESSAGE_HEATING:  ExtUI::onUserConfirmRequired_P(GET_TEXT(MSG_FILAMENT_CHANGE_HEATING));
+      case PAUSE_MESSAGE_OPTION:   ExtUI::onUserConfirmRequired_P(GET_TEXT(MSG_FILAMENT_CHANGE_OPTION_HEADER));
+      case PAUSE_MESSAGE_STATUS:
+      default: break;
+    }
+  }
+
 #endif
 
 #if ENABLED(EEPROM_SETTINGS)
