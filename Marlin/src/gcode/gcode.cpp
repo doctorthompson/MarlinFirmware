@@ -136,7 +136,7 @@ int8_t GcodeSuite::get_target_e_stepper_from_command() {
 }
 
 /**
- * Set XYZE destination and feedrate from the current GCode command
+ * Set XYZIJKE destination and feedrate from the current GCode command
  *
  *  - Set destination from included axis codes
  *  - Set to current for missing axis codes
@@ -727,6 +727,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
       #if HAS_LCD_CONTRAST
         case 250: M250(); break;                                  // M250: Set LCD contrast
+      #endif
+
+      #if HAS_LCD_BRIGHTNESS
+        case 256: M256(); break;                                  // M256: Set LCD brightness
       #endif
 
       #if ENABLED(EXPERIMENTAL_I2CBUS)

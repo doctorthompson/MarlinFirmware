@@ -87,7 +87,7 @@ constexpr int lco[] = LEVEL_CORNERS_LEVELING_ORDER;
 constexpr bool level_corners_3_points = COUNT(lco) == 2;
 static_assert(level_corners_3_points || COUNT(lco) == 4, "LEVEL_CORNERS_LEVELING_ORDER must have exactly 2 or 4 corners.");
 
-constexpr int lcodiff = abs(lco[0] - lco[1]);
+constexpr int lcodiff = ABS(lco[0] - lco[1]);
 static_assert(COUNT(lco) == 4 || lcodiff == 1 || lcodiff == 3, "The first two LEVEL_CORNERS_LEVELING_ORDER corners must be on the same edge.");
 
 constexpr int nr_edge_points = level_corners_3_points ? 3 : 4;
@@ -172,7 +172,7 @@ static void _lcd_level_bed_corners_get_next_position() {
 
     TERN_(HAS_MARLINUI_U8GLIB, ui.set_font(FONT_MENU)); // Set up the font for extra info
 
-    MenuItem_static::draw(0, GET_TEXT(MSG_PROBING_MESH), SS_INVERT); // "Probing Mesh" heading
+    MenuItem_static::draw(0, GET_TEXT(MSG_PROBING_POINT), SS_INVERT); // "Probing Mesh" heading
 
     uint8_t cy = TERN(TFT_COLOR_UI, 3, LCD_HEIGHT - 1), y = LCD_ROW_Y(cy);
 
@@ -187,7 +187,7 @@ static void _lcd_level_bed_corners_get_next_position() {
     }
 
     --cy;
-    y -= MENU_FONT_HEIGHT;
+    y -= MENU_LINE_HEIGHT;
 
     // Display the Last Z value
     if (PAGE_CONTAINS(y - (MENU_FONT_HEIGHT), y)) {

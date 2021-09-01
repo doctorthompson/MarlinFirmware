@@ -46,7 +46,7 @@
 #endif
 
 #if ENABLED(DWIN_CREALITY_LCD)
-  #include "../lcd/dwin/e3v2/dwin.h"
+  #include "../lcd/e3v2/creality/dwin.h"
 #endif
 
 #if ENABLED(EXTENSIBLE_UI)
@@ -63,21 +63,21 @@
 
 // LIB_MAX6675 can be added to the build_flags in platformio.ini to use a user-defined library
 // If LIB_MAX6675 is not on the build_flags then raw SPI reads will be used.
-#if HAS_MAX6675 && LIB_USR_MAX6675
+#if HAS_MAX6675 && USE_LIB_MAX6675
   #include <max6675.h>
   #define HAS_MAX6675_LIBRARY 1
 #endif
 
 // LIB_MAX31855 can be added to the build_flags in platformio.ini to use a user-defined library.
 // If LIB_MAX31855 is not on the build_flags then raw SPI reads will be used.
-#if HAS_MAX31855 && LIB_USR_MAX31855
+#if HAS_MAX31855 && USE_ADAFRUIT_MAX31855
   #include <Adafruit_MAX31855.h>
   #define HAS_MAX31855_LIBRARY 1
   typedef Adafruit_MAX31855 MAX31855;
 #endif
 
 #if HAS_MAX31865
-  #if LIB_USR_MAX31865
+  #if USE_ADAFRUIT_MAX31865
     #include <Adafruit_MAX31865.h>
     typedef Adafruit_MAX31865 MAX31865;
   #else
@@ -369,7 +369,7 @@ const char str_t_thermal_runaway[] PROGMEM = STR_T_THERMAL_RUNAWAY,
       }
     #endif
 
-    TERN_(SINGLENOZZLE, fan = 0); // Always use fan index 0 with SINGLENOZZLE
+    TERN_(SINGLENOZZLE, if (fan < EXTRUDERS) fan = 0); // Always fan 0 for SINGLENOZZLE E fan
 
     if (fan >= FAN_COUNT) return;
 
@@ -1481,7 +1481,7 @@ void Temperature::manage_heater() {
             fan_chamber_pwm = CHAMBER_FAN_BASE + _MAX((CHAMBER_FAN_FACTOR) * (temp_chamber.celsius - temp_chamber.target), 0);
           #endif
           NOMORE(fan_chamber_pwm, 225);
-          set_fan_speed(2, fan_chamber_pwm); // TODO: instead of fan 2, set to chamber fan
+          set_fan_speed(CHAMBER_FAN_INDEX, fan_chamber_pwm); // TODO: instead of fan 2, set to chamber fan
         #endif
 
         #if ENABLED(CHAMBER_VENT)
@@ -1512,7 +1512,7 @@ void Temperature::manage_heater() {
       else if (!flag_chamber_off) {
         #if ENABLED(CHAMBER_FAN)
           flag_chamber_off = true;
-          set_fan_speed(2, 0);
+          set_fan_speed(CHAMBER_FAN_INDEX, 0);
         #endif
         #if ENABLED(CHAMBER_VENT)
           flag_chamber_excess_heat = false;
@@ -1522,7 +1522,7 @@ void Temperature::manage_heater() {
     #endif
 
     #if ENABLED(PIDTEMPCHAMBER)
-      // PIDTEMPCHAMBER doens't support a CHAMBER_VENT yet.
+      // PIDTEMPCHAMBER doesn't support a CHAMBER_VENT yet.
       temp_chamber.soft_pwm_amount = WITHIN(temp_chamber.celsius, CHAMBER_MINTEMP, CHAMBER_MAXTEMP) ? (int)get_pid_output_chamber() >> 1 : 0;
     #else
       if (ELAPSED(ms, next_chamber_check_ms)) {
@@ -2288,9 +2288,7 @@ void Temperature::init() {
     INIT_FAN_PIN(CONTROLLER_FAN_PIN);
   #endif
 
-  #if HAS_MAXTC_SW_SPI
-    max_tc_spi.init();
-  #endif
+  TERN_(HAS_MAXTC_SW_SPI, max_tc_spi.init());
 
   HAL_adc_init();
 
@@ -3037,15 +3035,15 @@ void Temperature::isr() {
       #endif
 
       #if HAS_HEATED_BED
-        _PWM_MOD(BED,soft_pwm_bed,temp_bed);
+        _PWM_MOD(BED, soft_pwm_bed, temp_bed);
       #endif
 
       #if HAS_HEATED_CHAMBER
-        _PWM_MOD(CHAMBER,soft_pwm_chamber,temp_chamber);
+        _PWM_MOD(CHAMBER, soft_pwm_chamber, temp_chamber);
       #endif
 
       #if HAS_COOLER
-        _PWM_MOD(COOLER,soft_pwm_cooler,temp_cooler);
+        _PWM_MOD(COOLER, soft_pwm_cooler, temp_cooler);
       #endif
 
       #if ENABLED(FAN_SOFT_PWM)
