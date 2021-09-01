@@ -139,7 +139,7 @@
 
 // Choose the name from boards.h that matches your setup
 #ifndef MOTHERBOARD
-  #define MOTHERBOARD BOARD_BTT_SKR_MINI_E3_V2_0
+  #define MOTHERBOARD BOARD_BTT_SKR_E3_TURBO
 #endif
 
 // Name displayed in the LCD "Ready" message and Info menu
@@ -998,7 +998,7 @@
  *
  * See https://github.com/synthetos/TinyG/wiki/Jerk-Controlled-Motion-Explained
  */
-//#define S_CURVE_ACCELERATION
+#define S_CURVE_ACCELERATION
 
 //===========================================================================
 //============================= Z Probe Options =============================
@@ -1827,7 +1827,7 @@
 
 #define PREHEAT_2_LABEL       "PETG"
 #define PREHEAT_2_TEMP_HOTEND  230
-#define PREHEAT_2_TEMP_BED      85
+#define PREHEAT_2_TEMP_BED      70
 #define PREHEAT_2_TEMP_CHAMBER  35
 #define PREHEAT_2_FAN_SPEED     63 // Value from 0 to 255
 
