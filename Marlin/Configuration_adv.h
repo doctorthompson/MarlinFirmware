@@ -413,7 +413,7 @@
  */
 // #define AUTOTEMP
 #if ENABLED(AUTOTEMP)
-  #define AUTOTEMP_OLDWEIGHT    0.98
+  #define AUTOTEMP_OLDWEIGHT    0.98  // Factor used to weight previous readings (0.0 < value < 1.0)
   // Turn on AUTOTEMP on M104/M109 by default using proportions set here
   //#define AUTOTEMP_PROPORTIONAL
   #if ENABLED(AUTOTEMP_PROPORTIONAL)
@@ -1219,12 +1219,11 @@
 #endif
 
 #if HAS_LCD_MENU
-
   // Add Probe Z Offset calibration to the Z Probe Offsets menu
   #if HAS_BED_PROBE
     #define PROBE_OFFSET_WIZARD
     #if ENABLED(PROBE_OFFSET_WIZARD)
-      #define PROBE_OFFSET_WIZARD_START_Z -2.0   // Estimated nozzle-to-probe Z offset, plus a little extra
+      #define PROBE_OFFSET_WIZARD_START_Z -2.9   // Estimated nozzle-to-probe Z offset, plus a little extra
       #define PROBE_OFFSET_WIZARD_XY_POS XY_CENTER // Set a convenient position to do the measurement
     #endif
   #endif
@@ -1298,8 +1297,8 @@
 
 // LCD Print Progress options
 #if EITHER(SDSUPPORT, LCD_SET_PROGRESS_MANUALLY)
-  #if ANY(HAS_MARLINUI_U8GLIB, EXTENSIBLE_UI, HAS_MARLINUI_HD44780, IS_TFTGLCD_PANEL, IS_DWIN_MARLINUI)
-    #define SHOW_REMAINING_TIME         // Display estimated time to completion
+  #if CAN_SHOW_REMAINING_TIME
+    //#define SHOW_REMAINING_TIME         // Display estimated time to completion
     #if ENABLED(SHOW_REMAINING_TIME)
       #define USE_M73_REMAINING_TIME    // Use remaining time from M73 command instead of estimation
       #define ROTATE_PROGRESS_DISPLAY   // Display (P)rogress, (E)lapsed, and (R)emaining time
@@ -1358,7 +1357,7 @@
 
   //#define MEDIA_MENU_AT_TOP               // Force the media menu to be listed on the top of the main menu
 
-  #define EVENT_GCODE_SD_ABORT "G91\nG1 E-2 Z2\nG1 X5 Y5\nG90\nG1 X0 Y235 Z10" // G-code to run on SD Abort Print (e.g., "G28XY" or "G27")
+  #define EVENT_GCODE_SD_ABORT "G91\nG1 E-2 Z5\nG0 X5 Y5 F1500\nG90\nG0 X5 Y230 F3000\n" // G-code to run on SD Abort Print (e.g., "G28XY" or "G27")
 
   #if ENABLED(PRINTER_EVENT_LEDS)
     #define PE_LEDS_COMPLETED_TIME  (30*60) // (seconds) Time to keep the LED "done" color before restoring normal illumination
@@ -1857,7 +1856,7 @@
   //#define BABYSTEP_XY                     // Also enable X/Y Babystepping. Not supported on DELTA!
   #define BABYSTEP_INVERT_Z false           // Change if Z babysteps should go the other way
   #define BABYSTEP_MILLIMETER_UNITS       // Specify BABYSTEP_MULTIPLICATOR_(XY|Z) in mm instead of micro-steps
-  #define BABYSTEP_MULTIPLICATOR_Z  0.025       // (steps or mm) Steps or millimeter distance for each Z babystep
+  #define BABYSTEP_MULTIPLICATOR_Z  0.005       // (steps or mm) Steps or millimeter distance for each Z babystep
   // #define BABYSTEP_MULTIPLICATOR_XY 1       // (steps or mm) Steps or millimeter distance for each XY babystep
 
   #define DOUBLECLICK_FOR_Z_BABYSTEPPING    // Double-click on the Status Screen for Z Babystepping.
@@ -1899,7 +1898,7 @@
 #define LIN_ADVANCE
 #if ENABLED(LIN_ADVANCE)
   //#define EXTRA_LIN_ADVANCE_K // Enable for second linear advance constants
-  #define LIN_ADVANCE_K 0.194    // Unit: mm compression per 1mm/s extruder speed
+  #define LIN_ADVANCE_K 0.149    // Unit: mm compression per 1mm/s extruder speed
   //#define LA_DEBUG            // If enabled, this will generate debug information output over USB.
   #define EXPERIMENTAL_SCURVE   // Enable this option to permit S-Curve Acceleration
 #endif
@@ -1970,8 +1969,8 @@
    * between attempts, and after the maximum number of retries have been tried.
    */
   #define G29_SUCCESS_COMMANDS "M117 Bed leveling done."
-  #define G29_RECOVER_COMMANDS "M117 Probe failed. Rewiping.\nG28\nG12 P0 S12 T0"
-  #define G29_FAILURE_COMMANDS "M117 Bed leveling failed.\nG0 Z10\nM300 P25 S880\nM300 P50 S0\nM300 P25 S880\nM300 P50 S0\nM300 P25 S880\nM300 P50 S0\nG4 S1"
+  #define G29_RECOVER_COMMANDS "M117 Probe failed. Rewiping.\nG28\nG12 P0 S12 T0\n"
+  #define G29_FAILURE_COMMANDS "M117 Bed leveling failed.\nG0 Z10\nM300 P25 S880\nM300 P50 S0\nM300 P25 S880\nM300 P50 S0\nM300 P25 S880\nM300 P50 S0\nG4 S1\n"
 
 #endif
 
@@ -1995,7 +1994,7 @@
     #define PTC_PROBE_POS  { 90, 100 }
 
     // Enable additional compensation using hotend temperature
-    // Note: this values cannot be calibrated automatically but have to be set manually
+    // Note: this values cannot be calibrated automatically but have to be set manually via M871.
     //#define USE_TEMP_EXT_COMPENSATION
 
     // Probe temperature calibration generates a table of values starting at PTC_SAMPLE_START
@@ -2010,6 +2009,12 @@
     //#define BTC_SAMPLE_START  60  // (°C)
     //#define BTC_SAMPLE_RES     5  // (°C)
     //#define BTC_SAMPLE_COUNT  10
+
+    #if ENABLED(USE_TEMP_EXT_COMPENSATION)
+      //#define ETC_SAMPLE_START 180  // (°C)
+      //#define ETC_SAMPLE_RES     5  // (°C)
+      //#define ETC_SAMPLE_COUNT  20
+    #endif
 
     // The temperature the probe should be at while taking measurements during bed temperature
     // calibration.
@@ -2302,6 +2307,7 @@
    */
   //#define EVENT_GCODE_TOOLCHANGE_T0 "G28 A\nG1 A0" // Extra G-code to run while executing tool-change command T0
   //#define EVENT_GCODE_TOOLCHANGE_T1 "G1 A10"       // Extra G-code to run while executing tool-change command T1
+  //#define EVENT_GCODE_TOOLCHANGE_ALWAYS_RUN        // Always execute above G-code sequences. Use with caution!
 
   /**
    * Tool Sensors detect when tools have been picked up or dropped.
@@ -3731,15 +3737,15 @@
   //#define MAIN_MENU_ITEM_1_CONFIRM          // Show a confirmation dialog before this action
 
   #define MAIN_MENU_ITEM_2_DESC "Preheat for " PREHEAT_1_LABEL
-  #define MAIN_MENU_ITEM_2_GCODE "M140 S" STRINGIFY(PREHEAT_1_TEMP_BED) "\nM104 S" STRINGIFY(PREHEAT_1_TEMP_HOTEND)
+  #define MAIN_MENU_ITEM_2_GCODE "M140 S" STRINGIFY(PREHEAT_1_TEMP_BED) "\nM104 S" STRINGIFY(PREHEAT_1_TEMP_HOTEND) "\n"
   //#define MAIN_MENU_ITEM_2_CONFIRM
 
   #define MAIN_MENU_ITEM_3_DESC "Print PLA grid "
-  #define MAIN_MENU_ITEM_3_GCODE "G26 B50 F1.75 H195 S0.4 K1 L0.2"
+  #define MAIN_MENU_ITEM_3_GCODE "G26 B50 F1.75 H195 S0.4 K1 L0.2\n"
   #define MAIN_MENU_ITEM_3_CONFIRM
 
   #define MAIN_MENU_ITEM_4_DESC "Print PETG grid"
-  #define MAIN_MENU_ITEM_4_GCODE "G26 B85 F1.75 H230 S0.4 K1 L0.2"
+  #define MAIN_MENU_ITEM_4_GCODE "G26 B85 F1.75 H230 S0.4 K1 L0.2\n"
   #define MAIN_MENU_ITEM_4_CONFIRM
 
   //#define MAIN_MENU_ITEM_5_DESC "Home & Info"
