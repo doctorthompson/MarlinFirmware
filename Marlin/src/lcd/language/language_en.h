@@ -402,6 +402,7 @@ namespace Language_en {
   LSTR MSG_ADVANCE_K_E                    = _UxGT("Advance K *");
   LSTR MSG_CONTRAST                       = _UxGT("LCD Contrast");
   LSTR MSG_BRIGHTNESS                     = _UxGT("LCD Brightness");
+  LSTR MSG_LCD_BKL_TIMEOUT                = _UxGT("LCD Sleep (s)");
   LSTR MSG_STORE_EEPROM                   = _UxGT("Store Settings");
   LSTR MSG_LOAD_EEPROM                    = _UxGT("Load Settings");
   LSTR MSG_RESTORE_DEFAULTS               = _UxGT("Restore Defaults");
@@ -609,6 +610,7 @@ namespace Language_en {
     LSTR MSG_COLORS_RED                   = _UxGT("Red");
     LSTR MSG_COLORS_GREEN                 = _UxGT("Green");
     LSTR MSG_COLORS_BLUE                  = _UxGT("Blue");
+    LSTR MSG_COLORS_WHITE                 = _UxGT("White");
     LSTR MSG_UI_LANGUAGE                  = _UxGT("UI Language");
     LSTR MSG_SOUND_ENABLE                 = _UxGT("Enable sound");
     LSTR MSG_LOCKSCREEN                   = _UxGT("Lock Screen");
