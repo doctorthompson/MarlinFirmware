@@ -28,7 +28,7 @@
 /**
  * Marlin release version identifier
  */
-#define SHORT_BUILD_VERSION "bugfix-2.0.x-20220120"
+#define SHORT_BUILD_VERSION "bugfix-2.0.x-20220318"
 
 /**
  * Verbose version identifier which should contain a reference to the location
@@ -42,7 +42,7 @@
  * version was tagged.
  */
 
-#define STRING_DISTRIBUTION_DATE "2022-03-09"
+#define STRING_DISTRIBUTION_DATE "2022-03-18"
 
 /**
  * Defines a generic printer name to be output to the LCD after booting Marlin.
