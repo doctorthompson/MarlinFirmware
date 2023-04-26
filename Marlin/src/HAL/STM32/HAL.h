@@ -28,6 +28,7 @@
 #include "../shared/Marduino.h"
 #include "../shared/math_32bit.h"
 #include "../shared/HAL_SPI.h"
+#include "temp_soc.h"
 #include "fastio.h"
 #include "Servo.h"
 #include "MarlinSerial.h"
@@ -138,7 +139,7 @@
 
 typedef double isr_float_t;   // FPU ops are used for single-precision, so use double for ISRs.
 
-#ifdef STM32G0B1xx
+#if defined(STM32G0B1xx) || defined(STM32H7xx)
   typedef int32_t pin_t;
 #else
   typedef int16_t pin_t;
