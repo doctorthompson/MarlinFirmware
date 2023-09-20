@@ -3207,7 +3207,7 @@
   //#define CHOPPER_TIMING_V  CHOPPER_TIMING        // For V Axis
   //#define CHOPPER_TIMING_W  CHOPPER_TIMING        // For W Axis
   //#define CHOPPER_TIMING_E  CHOPPER_TIMING        // For Extruders (override below)
-  //#define CHOPPER_TIMING_E1 CHOPPER_TIMING_E
+ //#define CHOPPER_TIMING_E1 CHOPPER_TIMING_E
   //#define CHOPPER_TIMING_E2 CHOPPER_TIMING_E
   //#define CHOPPER_TIMING_E3 CHOPPER_TIMING_E
   //#define CHOPPER_TIMING_E4 CHOPPER_TIMING_E
@@ -4372,7 +4372,7 @@
 //
 // M43 - display pin status, toggle pins, watch pins, watch endstops & toggle LED, test servo probe
 //
-#define PINS_DEBUGGING
+// #define PINS_DEBUGGING
 
 // Enable Tests that will run at startup and produce a report
 //#define MARLIN_TEST_BUILD
