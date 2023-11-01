@@ -51,6 +51,7 @@ lcd_uint_t expand_u8str_P(char * const outstr, PGM_P const ptpl, const int8_t in
   int8_t n = maxlen;
   while (n > 0) {
     lchar_t wc;
+    uint8_t *psc = (uint8_t *)p;
     p = get_utf8_value_cb(p, read_byte_rom, wc);
     if (!wc) break;
     if (wc == '{' || wc == '~' || wc == '*') {
@@ -88,20 +89,11 @@ lcd_uint_t expand_u8str_P(char * const outstr, PGM_P const ptpl, const int8_t in
       n -= utf8_strlen(o);
       o += strlen(o);
     }
-    else if (wc == '@') {
-      *o++ = AXIS_CHAR(ind);
-      *o = '\0';
-      n--;
-    }
-    else if (wc > 255 && prop == 2) {
-      // Wide glyph support incomplete
-      *((uint16_t*)o) = wc;
-      o += 2;
-      *o = '\0';
-      n--;
-    }
     else {
-      *o++ = wc;
+      if (wc == '@')
+        *o++ = AXIS_CHAR(ind);
+      else
+        while (psc != p) *o++ = read_byte_rom(psc++);
       *o = '\0';
       n--;
     }
@@ -123,50 +115,10 @@ lcd_uint_t expand_u8str_P(char * const outstr, PGM_P const ptpl, const int8_t in
  * Return the number of characters emitted
  */
 lcd_uint_t lcd_put_u8str_P(PGM_P const ptpl, const int8_t ind, const char *cstr/*=nullptr*/, FSTR_P const fstr/*=nullptr*/, const lcd_uint_t maxlen/*=LCD_WIDTH*/) {
-  const uint8_t prop = USE_WIDE_GLYPH ? 2 : 1;
-  const uint8_t *p = (uint8_t*)ptpl;
-  int8_t n = maxlen;
-  while (n > 0) {
-    lchar_t wc;
-    p = get_utf8_value_cb(p, read_byte_rom, wc);
-    if (!wc) break;
-    if (wc == '{' || wc == '~' || wc == '*') {
-      if (ind >= 0) {
-        if (wc == '*') { lcd_put_u8str(F("E")); n--; }
-        if (n) {
-          int8_t inum = ind + ((wc == '{') ? 0 : LCD_FIRST_TOOL);
-          if (inum >= 10) {
-            lcd_put_lchar('0' + (inum / 10)); n--;
-            inum %= 10;
-          }
-          if (n) { lcd_put_lchar('0' + inum); n--; }
-        }
-      }
-      else {
-        PGM_P const b = ind == -2 ? GET_TEXT(MSG_CHAMBER) : GET_TEXT(MSG_BED);
-        n -= lcd_put_u8str_max_P(b, n * (MENU_FONT_WIDTH)) / (MENU_FONT_WIDTH);
-      }
-      if (n) {
-        n -= lcd_put_u8str_max_P((PGM_P)p, n * (MENU_FONT_WIDTH)) / (MENU_FONT_WIDTH);
-        break;
-      }
-    }
-    else if (wc == '$' && fstr) {
-      n -= lcd_put_u8str_max_P(FTOP(fstr), n * (MENU_FONT_WIDTH)) / (MENU_FONT_WIDTH);
-    }
-    else if (wc == '$' && cstr) {
-      n -= lcd_put_u8str_max(cstr, n * (MENU_FONT_WIDTH)) / (MENU_FONT_WIDTH);
-    }
-    else if (wc == '@') {
-      lcd_put_lchar(AXIS_CHAR(ind));
-      n--;
-    }
-    else {
-      lcd_put_lchar(wc);
-      n -= wc > 255 ? prop : 1;
-    }
-  }
-  return maxlen - n;
+  char estr[maxlen + 2];
+  const lcd_uint_t outlen = expand_u8str_P(estr, ptpl, ind, cstr, fstr, maxlen);
+  lcd_put_u8str_max(estr, maxlen * (MENU_FONT_WIDTH));
+  return outlen;
 }
 
 // Calculate UTF8 width with a simple check
