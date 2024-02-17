@@ -537,10 +537,10 @@
  * ================================================================
  *  SPI RTD/Thermocouple Boards
  * ================================================================
- *    -5 : MAX31865 with Pt100/Pt1000, 2, 3, or 4-wire  (only for sensors 0-1)
+ *    -5 : MAX31865 with Pt100/Pt1000, 2, 3, or 4-wire  (only for sensors 0-2 and bed)
  *                  NOTE: You must uncomment/set the MAX31865_*_OHMS_n defines below.
- *    -3 : MAX31855 with Thermocouple, -200°C to +700°C (only for sensors 0-1)
- *    -2 : MAX6675  with Thermocouple, 0°C to +700°C    (only for sensors 0-1)
+ *    -3 : MAX31855 with Thermocouple, -200°C to +700°C (only for sensors 0-2 and bed)
+ *    -2 : MAX6675  with Thermocouple, 0°C to +700°C    (only for sensors 0-2 and bed)
  *
  *  NOTE: Ensure TEMP_n_CS_PIN is set in your pins file for each TEMP_SENSOR_n using an SPI Thermocouple. By default,
  *        Hardware SPI on the default serial bus is used. If you have also set TEMP_n_SCK_PIN and TEMP_n_MISO_PIN,
@@ -870,7 +870,7 @@
  * *** IT IS HIGHLY RECOMMENDED TO LEAVE THIS OPTION ENABLED! ***
  */
 #define PREVENT_COLD_EXTRUSION
-#define EXTRUDE_MINTEMP 185
+#define EXTRUDE_MINTEMP 180
 
 /**
  * Prevent a single extrusion longer than EXTRUDE_MAXLENGTH.
@@ -915,8 +915,16 @@
 //#define COREYX
 //#define COREZX
 //#define COREZY
-//#define MARKFORGED_XY  // MarkForged. See https://reprap.org/forum/read.php?152,504042
+
+//
+// MarkForged Kinematics
+// See https://reprap.org/forum/read.php?152,504042
+//
+//#define MARKFORGED_XY
 //#define MARKFORGED_YX
+#if ANY(MARKFORGED_XY, MARKFORGED_YX)
+  //#define MARKFORGED_INVERSE  // Enable for an inverted Markforged kinematics belt path
+#endif
 
 // Enable for a belt style printer with endless "Z" motion
 //#define BELTPRINTER
@@ -973,7 +981,7 @@
   // Distance between bed and nozzle Z home position
   #define DELTA_HEIGHT 250.00             // (mm) Get this value from G33 auto calibrate
 
-  #define DELTA_ENDSTOP_ADJ { 0.0, 0.0, 0.0 } // Get these values from G33 auto calibrate
+  #define DELTA_ENDSTOP_ADJ { 0.0, 0.0, 0.0 } // (mm) Get these values from G33 auto calibrate
 
   // Horizontal distance bridged by diagonal push rods when effector is centered.
   #define DELTA_RADIUS 124.0              // (mm) Get this value from G33 auto calibrate
@@ -981,11 +989,11 @@
   // Trim adjustments for individual towers
   // tower angle corrections for X and Y tower / rotate XYZ so Z tower angle = 0
   // measured in degrees anticlockwise looking from above the printer
-  #define DELTA_TOWER_ANGLE_TRIM { 0.0, 0.0, 0.0 } // Get these values from G33 auto calibrate
+  #define DELTA_TOWER_ANGLE_TRIM { 0.0, 0.0, 0.0 } // (mm) Get these values from G33 auto calibrate
 
-  // Delta radius and diagonal rod adjustments (mm)
-  //#define DELTA_RADIUS_TRIM_TOWER { 0.0, 0.0, 0.0 }
-  //#define DELTA_DIAGONAL_ROD_TRIM_TOWER { 0.0, 0.0, 0.0 }
+  // Delta radius and diagonal rod adjustments
+  //#define DELTA_RADIUS_TRIM_TOWER       { 0.0, 0.0, 0.0 } // (mm)
+  //#define DELTA_DIAGONAL_ROD_TRIM_TOWER { 0.0, 0.0, 0.0 } // (mm)
 #endif
 
 // @section scara
@@ -1021,9 +1029,6 @@
     // Radius around the center where the arm cannot reach
     #define MIDDLE_DEAD_ZONE_R   0  // (mm)
 
-    #define THETA_HOMING_OFFSET  0  // Calculated from Calibration Guide and M360 / M114. See https://www.morgan3dp.com/morgan-calibration-guide/
-    #define PSI_HOMING_OFFSET    0  // Calculated from Calibration Guide and M364 / M114. See https://www.morgan3dp.com/morgan-calibration-guide/
-
   #elif ENABLED(MP_SCARA)
 
     #define SCARA_OFFSET_THETA1  12 // degrees
@@ -1042,23 +1047,19 @@
   #define DEFAULT_SEGMENTS_PER_SECOND 200
 
   // Length of inner and outer support arms. Measure arm lengths precisely.
-  #define TPARA_LINKAGE_1 120       // (mm)
-  #define TPARA_LINKAGE_2 120       // (mm)
+  #define TPARA_LINKAGE_1 120     // (mm)
+  #define TPARA_LINKAGE_2 120     // (mm)
 
-  // SCARA tower offset (position of Tower relative to bed zero position)
-  // This needs to be reasonably accurate as it defines the printbed position in the SCARA space.
-  #define TPARA_OFFSET_X    0       // (mm)
-  #define TPARA_OFFSET_Y    0       // (mm)
-  #define TPARA_OFFSET_Z    0       // (mm)
+  // TPARA tower offset (position of Tower relative to bed zero position)
+  // This needs to be reasonably accurate as it defines the printbed position in the TPARA space.
+  #define TPARA_OFFSET_X    0     // (mm)
+  #define TPARA_OFFSET_Y    0     // (mm)
+  #define TPARA_OFFSET_Z    0     // (mm)
 
   #define FEEDRATE_SCALING        // Convert XY feedrate from mm/s to degrees/s on the fly
 
   // Radius around the center where the arm cannot reach
   #define MIDDLE_DEAD_ZONE_R   0  // (mm)
-
-  // Calculated from Calibration Guide and M360 / M114. See https://www.morgan3dp.com/morgan-calibration-guide/
-  #define THETA_HOMING_OFFSET  0
-  #define PSI_HOMING_OFFSET    0
 #endif
 
 // @section polar
@@ -1246,10 +1247,15 @@
 
 /**
  * Default Axis Steps Per Unit (linear=steps/mm, rotational=steps/°)
- * Override with M92
+ * Override with M92 (when enabled below)
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
 #define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 415 }
+
+/**
+ * Enable support for M92. Disable to save at least ~530 bytes of flash.
+ */
+#define EDITABLE_STEPS_PER_UNIT
 
 /**
  * Default Max Feed Rate (linear=mm/s, rotational=°/s)
@@ -1301,6 +1307,7 @@
   #define DEFAULT_XJERK 10.0
   #define DEFAULT_YJERK 10.0
   #define DEFAULT_ZJERK  0.3
+  #define DEFAULT_EJERK  5.0
   //#define DEFAULT_IJERK  0.3
   //#define DEFAULT_JJERK  0.3
   //#define DEFAULT_KJERK  0.3
@@ -1453,6 +1460,20 @@
  * Uses I2C port, so it requires I2C library markyue/Panda_SoftMasterI2C.
  */
 //#define BD_SENSOR
+#if ENABLED(BD_SENSOR)
+  //#define BD_SENSOR_PROBE_NO_STOP // Probe bed without stopping at each probe point
+#endif
+
+/**
+ * BIQU MicroProbe
+ *
+ * A lightweight, solenoid-driven probe.
+ * For information about this sensor https://github.com/bigtreetech/MicroProbe
+ *
+ * Also requires: PROBE_ENABLE_DISABLE
+ */
+//#define BIQU_MICROPROBE_V1  // Triggers HIGH
+//#define BIQU_MICROPROBE_V2  // Triggers LOW
 
 // A probe that is deployed and stowed with a solenoid pin (SOL1_PIN)
 //#define SOLENOID_PROBE
@@ -1588,7 +1609,7 @@
 #define PROBING_MARGIN 15
 
 // X and Y axis travel speed (mm/min) between probes
-#define XY_PROBE_FEEDRATE (133*60)
+#define XY_PROBE_FEEDRATE (150*60)
 
 // Feedrate (mm/min) for the first approach when double-probing (MULTIPLE_PROBING == 2)
 #define Z_PROBE_FEEDRATE_FAST (30*60)
@@ -1778,8 +1799,13 @@
  */
 //#define Z_IDLE_HEIGHT Z_HOME_POS
 
+#define Z_CLEARANCE_FOR_HOMING  4   // (mm) Minimal Z height before homing (G28) for Z clearance above the bed, clamps, ...
+                                      // You'll need this much clearance above Z_MAX_POS to avoid grinding.
 
-#define Z_AFTER_HOMING         5 // (mm) Height to move to after homing (if Z was homed)
+#define Z_AFTER_HOMING         5   // (mm) Height to move to after homing (if Z was homed)
+#define XY_AFTER_HOMING { 10, 10 }  // (mm) Move to an XY position after homing (and raising Z)
+
+//#define EVENT_GCODE_AFTER_HOMING "M300 P440 S200"  // Commands to run after G28 (and move to XY_AFTER_HOMING)
 
 // Direction of endstops when homing; 1=MAX, -1=MIN
 // :[-1,1]
@@ -2027,7 +2053,7 @@
  * Commands to execute at the end of G29 probing.
  * Useful to retract or move the Z probe out of the way.
  */
-//#define Z_PROBE_END_SCRIPT "G1 Z10 F12000\nG1 X15 Y330\nG1 Z0.5\nG1 Z10"
+//#define EVENT_GCODE_AFTER_G29 "G1 Z10 F12000\nG1 X15 Y330\nG1 Z0.5\nG1 Z10"
 
 /**
  * Normally G28 leaves leveling disabled on completion. Enable one of
@@ -2049,7 +2075,7 @@
 /**
  * Enable detailed logging of G28, G29, M48, etc.
  * Turn on with the command 'M111 S32'.
- * NOTE: Requires a lot of PROGMEM!
+ * NOTE: Requires a lot of flash!
  */
 //#define DEBUG_LEVELING_FEATURE
 
@@ -2083,10 +2109,10 @@
   #define G26_MESH_VALIDATION
   #if ENABLED(G26_MESH_VALIDATION)
     #define MESH_TEST_NOZZLE_SIZE    0.6  // (mm) Diameter of primary nozzle.
-    #define MESH_TEST_LAYER_HEIGHT   0.2  // (mm) Default layer height for the G26 Mesh Validation Tool.
+    #define MESH_TEST_LAYER_HEIGHT   0.24  // (mm) Default layer height for the G26 Mesh Validation Tool.
     #define MESH_TEST_HOTEND_TEMP  205    // (°C) Default nozzle temperature for the G26 Mesh Validation Tool.
-    #define MESH_TEST_BED_TEMP      50    // (°C) Default bed temperature for the G26 Mesh Validation Tool.
-    #define G26_XY_FEEDRATE         20    // (mm/s) Feedrate for XY Moves for the G26 Mesh Validation Tool.
+    #define MESH_TEST_BED_TEMP      60    // (°C) Default bed temperature for the G26 Mesh Validation Tool.
+    #define G26_XY_FEEDRATE         30    // (mm/s) Feedrate for XY Moves for the G26 Mesh Validation Tool.
     #define G26_XY_FEEDRATE_TRAVEL 100    // (mm/s) Feedrate for G26 XY travel moves.
     #define G26_RETRACT_MULTIPLIER  1.2  // G26 Q (retraction) used by default between mesh test elements.
   #endif
@@ -2115,7 +2141,7 @@
     #define ABL_BILINEAR_SUBDIVISION
     #if ENABLED(ABL_BILINEAR_SUBDIVISION)
       // Number of subdivisions between probe points
-      #define BILINEAR_SUBDIVISIONS 2
+      #define BILINEAR_SUBDIVISIONS 3
     #endif
 
   #endif
@@ -2196,7 +2222,7 @@
 #if ENABLED(LCD_BED_TRAMMING)
   #define BED_TRAMMING_INSET_LFRB { 30, 30, 48, 30 }  // (mm) Left, Front, Right, Back insets
   #define BED_TRAMMING_HEIGHT      0.0        // (mm) Z height of nozzle at leveling points
-  #define BED_TRAMMING_Z_HOP       5.0        // (mm) Z height of nozzle between leveling points
+  #define BED_TRAMMING_Z_HOP       3.0        // (mm) Z height of nozzle between leveling points
   #define BED_TRAMMING_INCLUDE_CENTER       // Move to the center after the last corner
   #define BED_TRAMMING_USE_PROBE
   #if ENABLED(BED_TRAMMING_USE_PROBE)
@@ -2245,13 +2271,13 @@
 #define Z_SAFE_HOMING
 
 #if ENABLED(Z_SAFE_HOMING)
-  #define Z_SAFE_HOMING_X_POINT X_CENTER  // X point for Z homing
-  #define Z_SAFE_HOMING_Y_POINT Y_CENTER  // Y point for Z homing
+  #define Z_SAFE_HOMING_X_POINT X_CENTER  // (mm) X point for Z homing
+  #define Z_SAFE_HOMING_Y_POINT Y_CENTER  // (mm) Y point for Z homing
   //#define Z_SAFE_HOMING_POINT_ABSOLUTE  // Ignore home offsets (M206) for Z homing position
 #endif
 
 // Homing speeds (mm/min)
-#define HOMING_FEEDRATE_MM_M { (60*60), (60*60), (20*60) }
+#define HOMING_FEEDRATE_MM_M { (133*60), (133*60), (20*60) }
 
 // Validate that endstops are triggered on homing moves
 #define VALIDATE_HOMING_ENDSTOPS
@@ -2400,7 +2426,7 @@
   #define NOZZLE_PARK_MOVE          0   // Park motion: 0 = XY Move, 1 = X Only, 2 = Y Only, 3 = X before Y, 4 = Y before X
   #define NOZZLE_PARK_Z_RAISE_MIN   2   // (mm) Always raise Z by at least this distance
   #define NOZZLE_PARK_XY_FEEDRATE 133   // (mm/s) X and Y axes feedrate (also used for delta Z axis)
-  #define NOZZLE_PARK_Z_FEEDRATE   25   // (mm/s) Z axis feedrate (not used for delta printers)
+  #define NOZZLE_PARK_Z_FEEDRATE   20   // (mm/s) Z axis feedrate (not used for delta printers)
 #endif
 
 /**
@@ -2699,8 +2725,8 @@
 //
 // Add individual axis homing items (Home X, Home Y, and Home Z) to the LCD menu.
 //
-//#define INDIVIDUAL_AXIS_HOMING_MENU
-//#define INDIVIDUAL_AXIS_HOMING_SUBMENU
+#define INDIVIDUAL_AXIS_HOMING_MENU
+#define INDIVIDUAL_AXIS_HOMING_SUBMENU
 
 //
 // SPEAKER/BUZZER
@@ -2717,8 +2743,8 @@
 // Note: Test audio output with the G-Code:
 //  M300 S<frequency Hz> P<duration ms>
 //
-//#define LCD_FEEDBACK_FREQUENCY_DURATION_MS 2
-//#define LCD_FEEDBACK_FREQUENCY_HZ 5000
+#define LCD_FEEDBACK_FREQUENCY_DURATION_MS 2
+#define LCD_FEEDBACK_FREQUENCY_HZ 659
 
 //
 // Tone queue size, used to keep beeps from blocking execution.
@@ -3004,8 +3030,13 @@
 //#define BTT_MINI_12864
 
 //
+// BEEZ MINI 12864 is an alias for FYSETC_MINI_12864_2_1. Type A/B. NeoPixel RGB Backlight.
+//
+//#define BEEZ_MINI_12864
+
+//
 // Factory display for Creality CR-10 / CR-7 / Ender-3
-// https://www.aliexpress.com/item/32833148327.html
+// https://marlinfw.org/docs/hardware/controllers.html#cr10_stockdisplay
 //
 // Connect to EXP1 on RAMPS and compatible boards.
 //
@@ -3017,14 +3048,14 @@
 //#define ENDER2_STOCKDISPLAY
 
 //
-// ANET and Tronxy Graphical Controller
-//
-// Anet 128x64 full graphics lcd with rotary encoder as used on Anet A6
-// A clone of the RepRapDiscount full graphics display but with
-// different pins/wiring (see pins_ANET_10.h). Enable one of these.
+// ANET and Tronxy 128×64 Full Graphics Controller as used on Anet A6
 //
 //#define ANET_FULL_GRAPHICS_LCD
-//#define ANET_FULL_GRAPHICS_LCD_ALT_WIRING
+
+//
+// GUCOCO CTC 128×64 Full Graphics Controller as used on GUCOCO CTC A10S
+//
+//#define CTC_A10S_A13
 
 //
 // AZSMZ 12864 LCD with SD
@@ -3387,7 +3418,6 @@
   #define BUTTON_DELAY_MENU     250 // (ms) Button repeat delay for menus
 
   //#define DISABLE_ENCODER         // Disable the click encoder, if any
-  //#define TOUCH_IDLE_SLEEP_MINS 5 // (minutes) Display Sleep after a period of inactivity. Set with M255 S.
 
   #define TOUCH_SCREEN_CALIBRATION
 
@@ -3509,17 +3539,14 @@
 #endif
 
 // Support for Adafruit NeoPixel LED driver
-//#define NEOPIXEL_LED
+#define NEOPIXEL_LED
 #if ENABLED(NEOPIXEL_LED)
-  #define NEOPIXEL_TYPE          NEO_GRBW // NEO_GRBW, NEO_RGBW, NEO_GRB, NEO_RBG, etc.
-                                          // See https://github.com/adafruit/Adafruit_NeoPixel/blob/master/Adafruit_NeoPixel.h
-  //#define NEOPIXEL_PIN                4 // LED driving pin
-  //#define NEOPIXEL2_TYPE  NEOPIXEL_TYPE
-  //#define NEOPIXEL2_PIN               5
-  #define NEOPIXEL_PIXELS              30 // Number of LEDs in the strip. (Longest strip when NEOPIXEL2_SEPARATE is disabled.)
+  #define NEOPIXEL_TYPE           NEO_GRB  // NEO_GRBW, NEO_RGBW, NEO_GRB, NEO_RBG, etc.
+  #define NEOPIXEL_PIN BOARD_NEOPIXEL_PIN
+  #define NEOPIXEL_PIXELS               7 // Number of LEDs in the strip. (Longest strip when NEOPIXEL2_SEPARATE is disabled.)
   #define NEOPIXEL_IS_SEQUENTIAL          // Sequential display for temperature change - LED by LED. Disable to change all LEDs at once.
   #define NEOPIXEL_BRIGHTNESS         127 // Initial brightness (0-255)
-  //#define NEOPIXEL_STARTUP_TEST         // Cycle through colors at startup
+  #define NEOPIXEL_STARTUP_TEST           // Cycle through colors at startup
 
   // Support for second Adafruit NeoPixel LED driver controlled with M150 S1 ...
   //#define NEOPIXEL2_SEPARATE
