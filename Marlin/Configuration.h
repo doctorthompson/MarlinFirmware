@@ -3530,7 +3530,7 @@
  */
 
 // LED Type. Enable only one of the following two options:
-#define RGB_LED
+//#define RGB_LED
 //#define RGBW_LED
 
 #if ANY(RGB_LED, RGBW_LED)
@@ -3548,7 +3548,7 @@
 #endif
 
 // Support for Adafruit NeoPixel LED driver
-#define NEOPIXEL_LED
+//#define NEOPIXEL_LED
 #if ENABLED(NEOPIXEL_LED)
   #define NEOPIXEL_TYPE           NEO_GRB  // NEO_GRBW, NEO_RGBW, NEO_GRB, NEO_RBG, etc.
   #define NEOPIXEL_PIN BOARD_NEOPIXEL_PIN
