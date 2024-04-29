@@ -28,7 +28,7 @@
 /**
  * Marlin release version identifier
  */
-#define SHORT_BUILD_VERSION "bugfix-2.1.x-20240216-LT"
+#define SHORT_BUILD_VERSION "bugfix-2.1.x-20240429-SLF"
 
 /**
  * Verbose version identifier which should contain a reference to the location
@@ -41,12 +41,13 @@
  * here we define this default string as the date where the latest release
  * version was tagged.
  */
-#define STRING_DISTRIBUTION_DATE "2024-03-24-SLF"
+
+#define STRING_DISTRIBUTION_DATE "2024-04-29-SLF"
 
 /**
  * Defines a generic printer name to be output to the LCD after booting Marlin.
  */
-#define MACHINE_NAME "Ender 3 LT"
+#define MACHINE_NAME "Ender 3 SLF"
 
 /**
  * The SOURCE_CODE_URL is the location where users will find the Marlin Source
