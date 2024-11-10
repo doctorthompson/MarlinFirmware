@@ -28,7 +28,7 @@
 /**
  * Marlin release version identifier
  */
-#define SHORT_BUILD_VERSION "bugfix-2.1.x-20240508-SLF"
+#define SHORT_BUILD_VERSION "bugfix-2.1.x-20241109-SLF"
 
 /**
  * Verbose version identifier which should contain a reference to the location
@@ -41,7 +41,8 @@
  * here we define this default string as the date where the latest release
  * version was tagged.
  */
-#define STRING_DISTRIBUTION_DATE "2024-05-08-SLF"
+
+#define STRING_DISTRIBUTION_DATE "2024-11-09-SLF"
 
 /**
  * Defines a generic printer name to be output to the LCD after booting Marlin.
