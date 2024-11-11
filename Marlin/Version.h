@@ -28,7 +28,7 @@
 /**
  * Marlin release version identifier
  */
-#define SHORT_BUILD_VERSION "bugfix-2.1.x-20241109-SLF"
+#define SHORT_BUILD_VERSION "bugfix-2.1.x-20241111-SLF"
 
 /**
  * Verbose version identifier which should contain a reference to the location
@@ -42,7 +42,7 @@
  * version was tagged.
  */
 
-#define STRING_DISTRIBUTION_DATE "2024-11-09-SLF"
+#define STRING_DISTRIBUTION_DATE "2024-11-11-SLF"
 
 /**
  * Defines a generic printer name to be output to the LCD after booting Marlin.
@@ -69,8 +69,8 @@
 //#define WEBSITE_URL "marlinfw.org"
 
 /**
- * Set the vendor info the serial USB interface, if changable
- * Currently only supported by DUE platform
+ * Set the vendor info the serial USB interface, if changeable.
+ * Currently only supported by DUE platform.
  */
 //#define USB_DEVICE_VENDOR_ID           0x0000
 //#define USB_DEVICE_PRODUCT_ID          0x0000
