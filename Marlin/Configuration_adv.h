@@ -1087,7 +1087,7 @@
 #if ENABLED(ASSISTED_TRAMMING)
 
   // Define positions for probe points.
-  #define TRAMMING_POINT_XY { {  50, 50 }, { 185,  50 }, { 185, 185 }, { 50, 185 } }
+  #define TRAMMING_POINT_XY { {  35, 35 }, { 200, 35 }, { 200, 200 }, { 35, 200} }
 
   // Define position names for probe points.
   #define TRAMMING_POINT_NAME_1 "Q3"
@@ -1282,7 +1282,7 @@
 // Backlash Compensation
 // Adds extra movement to axes on direction-changes to account for backlash.
 //
-#define BACKLASH_COMPENSATION
+//#define BACKLASH_COMPENSATION
 #if ENABLED(BACKLASH_COMPENSATION)
   // Define values for backlash distance and correction.
   // If BACKLASH_GCODE is enabled these values are the defaults.
@@ -2329,9 +2329,9 @@
 #define LIN_ADVANCE
 #if ENABLED(LIN_ADVANCE)
   #if ENABLED(DISTINCT_E_FACTORS)
-    #define ADVANCE_K { 0.14 }    // (mm) Compression length per 1mm/s extruder speed, per extruder
+    #define ADVANCE_K { 0.014 }    // (mm) Compression length per 1mm/s extruder speed, per extruder
   #else
-    #define ADVANCE_K 0.14        // (mm) Compression length applying to all extruders
+    #define ADVANCE_K 0.014        // (mm) Compression length applying to all extruders
   #endif
   #define ADVANCE_K_EXTRA       // Add a second linear advance constant, configurable with M900 L.
   //#define LA_DEBUG              // Print debug information to serial during operation. Disable for production use.
@@ -2986,7 +2986,7 @@
 
   #if AXIS_IS_TMC_CONFIG(X)
     #define X_CURRENT       600        // (mA) RMS current. Multiply by 1.414 for peak current.
-    #define X_CURRENT_HOME  X_CURRENT  // (mA) RMS current for homing. (Typically lower than *_CURRENT.)
+    #define X_CURRENT_HOME  (X_CURRENT/2)  // (mA) RMS current for homing. (Typically lower than *_CURRENT.)
     #define X_MICROSTEPS     16        // 0..256
     #define X_RSENSE          0.11
     #define X_CHAIN_POS      -1        // -1..0: Not chained. 1: MCU MOSI connected. 2: Next in chain, ...
