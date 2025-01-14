@@ -1087,7 +1087,9 @@
 #if ENABLED(ASSISTED_TRAMMING)
 
   // Define positions for probe points.
-  #define TRAMMING_POINT_XY { {  35, 35 }, { 200, 35 }, { 200, 200 }, { 35, 200} }
+  #define _TRAM_LO 50
+  #define _TRAM_HI 185
+  #define TRAMMING_POINT_XY { {  _TRAM_LO, _TRAM_LO }, { _TRAM_HI, _TRAM_LO }, { _TRAM_HI, _TRAM_HI }, { _TRAM_LO, _TRAM_HI} }
 
   // Define position names for probe points.
   #define TRAMMING_POINT_NAME_1 "Q3"
